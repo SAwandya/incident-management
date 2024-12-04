@@ -1,32 +1,24 @@
 const express = require("express");
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 const mongoose = require("mongoose");
 require("dotenv").config();
 const employeerouter = require("./Routes/EmployeeRoute");
 const complainrouter = require("./Routes/ComplainRoute");
-const router=require("./Routes/UserRoutes_A")
+const router = require("./Routes/UserRoutes_A");
 
 const app = express();
 const cors = require("cors");
 
 // Disable the X-Powered-By header for security
-app.disable('x-powered-by');
+app.disable("x-powered-by");
 
-// Configure CORS options
-const corsOptions = {
-  origin: ['http://localhost:3000'], // Replace with trusted origins
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow only specific HTTP methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
-  credentials: true, // Allow cookies or other credentials to be sent
-};
-
+app.use(cors());
 
 //Middelware
 app.use(express.json());
-app.use(cors(corsOptions));
 app.use("/employees", employeerouter);
 app.use("/complains", complainrouter);
-app.use("/users_A",router)
+app.use("/users_A", router);
 
 // Serve static files from the React frontend
 app.use(express.static("./frontend/build")); // or "../frontend/dist" if "dist" is your build output
@@ -36,11 +28,15 @@ app.get("*", (req, res) => {
   res.sendFile(path.resolve(__dirname, "frontend", "build", "index.html"));
 });
 
+const PORT = process.env.PORT || 5000;
+
 mongoose
   .connect(process.env.MONGO_URL)
   .then(() => console.log("Connected to MongoDB"))
   .then(() => {
-    app.listen(5000);
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
   })
   .catch((err) => console.log(err));
 
@@ -93,50 +89,49 @@ app.post("/login", async (req, res) => {
   }
 });
 
-
-const Issue = require('./Models/ComplainModel'); // Import the model for the complaint
+const Issue = require("./Models/ComplainModel"); // Import the model for the complaint
 const chartrouter = express.Router(); // Router for chart-related routes
 
 /// Route to get the count of issues by type
-chartrouter.get('/issues/count-by-type', async (req, res) => {
+chartrouter.get("/issues/count-by-type", async (req, res) => {
   try {
     const result = await Issue.aggregate([
-      { $group: { _id: "$issue_type", count: { $sum: 1 } } } // Group by 'issue_type' and count occurrences
+      { $group: { _id: "$issue_type", count: { $sum: 1 } } }, // Group by 'issue_type' and count occurrences
     ]);
     res.json(result); // Send the aggregated result back to the client
   } catch (error) {
-    console.error('Error fetching issue count:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error fetching issue count:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
 /// Route to get the count of complaints by issue type and status
-chartrouter.get('/issues/count-by-type-and-status', async (req, res) => {
+chartrouter.get("/issues/count-by-type-and-status", async (req, res) => {
   try {
     const result = await Issue.aggregate([
-      { 
+      {
         $group: {
           _id: { issue_type: "$issue_type", status: "$status" },
-          count: { $sum: 1 }
-        }
+          count: { $sum: 1 },
+        },
       },
-      { 
+      {
         $project: {
           issue_type: "$_id.issue_type",
           status: "$_id.status",
           count: 1,
-          _id: 0
-        }
-      }
+          _id: 0,
+        },
+      },
     ]);
     res.json(result); // Send the aggregated result back to the client
   } catch (error) {
-    console.error('Error fetching issue count by type and status:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error fetching issue count by type and status:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-chartrouter.get('/issues/count-by-month', async (req, res) => {
+chartrouter.get("/issues/count-by-month", async (req, res) => {
   try {
     const currentMonth = new Date();
     const previousMonth = new Date();
@@ -145,9 +140,18 @@ chartrouter.get('/issues/count-by-month', async (req, res) => {
     const result = await Issue.aggregate([
       {
         $match: {
-          createdAt: { // Assuming 'createdAt' stores the issue's creation date
-            $gte: new Date(previousMonth.getFullYear(), previousMonth.getMonth(), 1),
-            $lte: new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0),
+          createdAt: {
+            // Assuming 'createdAt' stores the issue's creation date
+            $gte: new Date(
+              previousMonth.getFullYear(),
+              previousMonth.getMonth(),
+              1
+            ),
+            $lte: new Date(
+              currentMonth.getFullYear(),
+              currentMonth.getMonth() + 1,
+              0
+            ),
           },
         },
       },
@@ -178,24 +182,22 @@ chartrouter.get('/issues/count-by-month', async (req, res) => {
 
     res.json(formattedResult);
   } catch (error) {
-    console.error('Error fetching issue count by month:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error fetching issue count by month:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-
 // Use the chartrouter
-app.use('/api', chartrouter); // Route is accessible at /api/issues/count-by-type
-
+app.use("/api", chartrouter); // Route is accessible at /api/issues/count-by-type
 
 //Send an email
-app.post('/send-email', async (req, res) => {
+app.post("/send-email", async (req, res) => {
   const { employeeEmail, employeeName, complainDetails } = req.body;
 
   try {
     // Configure the transporter
     const transporter = nodemailer.createTransport({
-      service: 'gmail', // or any email provider you use
+      service: "gmail", // or any email provider you use
       auth: {
         user: process.env.SENDERMAIL, // replace with your email
         pass: process.env.PASSWORD, // replace with your email password or app password
@@ -214,10 +216,9 @@ app.post('/send-email', async (req, res) => {
     // Send email
     await transporter.sendMail(mailOptions);
 
-    res.status(200).send({ message: 'Email sent successfully' });
+    res.status(200).send({ message: "Email sent successfully" });
   } catch (error) {
-    console.error('Error sending email:', error);
-    res.status(500).send({ error: 'Failed to send email' });
+    console.error("Error sending email:", error);
+    res.status(500).send({ error: "Failed to send email" });
   }
 });
-
