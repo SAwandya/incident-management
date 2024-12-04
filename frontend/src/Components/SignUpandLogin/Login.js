@@ -50,10 +50,13 @@ function Login() {
 
   const sendRequest = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/login", {
-        email: user.email,
-        password: user.password,
-      });
+      const res = await axios.post(
+        "https://incident-management-new.azurewebsites.net/login",
+        {
+          email: user.email,
+          password: user.password,
+        }
+      );
       return res.data;
     } catch (err) {
       throw new Error(err.response?.data?.error || "Login failed");

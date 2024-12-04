@@ -29,7 +29,9 @@ function AddIncident() {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/employees");
+        const response = await axios.get(
+          "https://incident-management-new.azurewebsites.net/employees"
+        );
         setEmployees(response.data.employees); // Assuming the response format
       } catch (error) {
         console.error("Error fetching employees:", error);
@@ -66,30 +68,36 @@ function AddIncident() {
   const sendRequest = async () => {
     try {
       // Submit incident details
-      const res = await axios.post("http://localhost:5000/users_A", {
-        complain_id: String(inputs.complain_id),
-        customer_name: String(inputs.customer_name),
-        customer_email: String(inputs.customer_email),
-        customer_mobile: String(inputs.customer_mobile),
-        customer_address: String(inputs.customer_address),
-        issue_type: String(inputs.issue_type),
-        issue_date: String(inputs.issue_date),
-        description: String(inputs.description),
-        employee_name: String(inputs.employee_name),
-        employee_email: String(inputs.employee_email),
-      });
+      const res = await axios.post(
+        "https://incident-management-new.azurewebsites.net/users_A",
+        {
+          complain_id: String(inputs.complain_id),
+          customer_name: String(inputs.customer_name),
+          customer_email: String(inputs.customer_email),
+          customer_mobile: String(inputs.customer_mobile),
+          customer_address: String(inputs.customer_address),
+          issue_type: String(inputs.issue_type),
+          issue_date: String(inputs.issue_date),
+          description: String(inputs.description),
+          employee_name: String(inputs.employee_name),
+          employee_email: String(inputs.employee_email),
+        }
+      );
   
       // Send email notification
-      await axios.post("http://localhost:5000/send-email", {
-        employeeEmail: inputs.employee_email,
-        employeeName: inputs.employee_name,
-        complainDetails: `
+      await axios.post(
+        "https://incident-management-new.azurewebsites.net/send-email",
+        {
+          employeeEmail: inputs.employee_email,
+          employeeName: inputs.employee_name,
+          complainDetails: `
           Complain ID: ${inputs.complain_id}
           Customer Name: ${inputs.customer_name}
           Issue Type: ${inputs.issue_type}
           Description: ${inputs.description}
         `,
-      });
+        }
+      );
   
       return res.data;
     } catch (error) {

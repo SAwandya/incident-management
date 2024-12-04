@@ -9,7 +9,7 @@ import Pagination from "../Pagination/Pagination";
 import "./Complain.css";
 import "./Complaintable.css";
 
-const URL = "http://localhost:5000/complains";
+const URL = "https://incident-management-new.azurewebsites.net/complains";
 
 const fetchHandler = async () => {
   return await axios.get(URL).then((res) => res.data);

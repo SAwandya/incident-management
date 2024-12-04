@@ -39,7 +39,7 @@ function AddComplain() {
 
   const sendRequest = async () => {
     await axios
-      .post("http://localhost:5000/complains", {
+      .post("https://incident-management-new.azurewebsites.net/complains", {
         cus_name: String(inputs.cus_name),
         cus_email: String(inputs.cus_email),
         cus_address: String(inputs.cus_address),

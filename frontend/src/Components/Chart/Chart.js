@@ -150,17 +150,26 @@ function Chart() {
 
   // Fetch chart data
   useEffect(() => {
-    fetchData("http://localhost:5000/api/issues/count-by-type", transformChartData).then(setChartData);
+    fetchData(
+      "https://incident-management-new.azurewebsites.net/api/issues/count-by-type",
+      transformChartData
+    ).then(setChartData);
   }, []);
 
   // Fetch grouped data
   useEffect(() => {
-    fetchData("http://localhost:5000/api/issues/count-by-type-and-status", transformGroupedData).then(setGroupedData);
+    fetchData(
+      "https://incident-management-new.azurewebsites.net/api/issues/count-by-type-and-status",
+      transformGroupedData
+    ).then(setGroupedData);
   }, []);
 
   // Fetch comparison data
   useEffect(() => {
-    fetchData("http://localhost:5000/api/issues/count-by-month", transformComparisonData).then(setComparisonData);
+    fetchData(
+      "https://incident-management-new.azurewebsites.net/api/issues/count-by-month",
+      transformComparisonData
+    ).then(setComparisonData);
   }, []);
 
   return (

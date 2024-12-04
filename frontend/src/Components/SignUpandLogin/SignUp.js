@@ -37,7 +37,7 @@ function SignUp() {
 
   const sendRequest = async () => {
     await axios
-      .post("http://localhost:5000/register", {
+      .post("https://incident-management-new.azurewebsites.net/register", {
         full_name: String(user.full_name),
         email: String(user.email),
         phone: String(user.phone),
